@@ -1,0 +1,282 @@
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using System.ComponentModel.DataAnnotations;
+using System.Security.Claims;
+
+namespace SampleApi.Controllers;
+
+/// <summary>
+/// DTO для ответа при создании фото
+/// </summary>
+public record PhotoCreatedResponse(Guid PhotoId);
+
+/// <summary>
+/// DTO для ответа с URL фото
+/// </summary>
+public record PhotoUrlResponse(string Url, double? ExpireTimeMillis = null);
+
+/// <summary>
+/// Контроллер для работы с фотографиями (учебный пример)
+/// </summary>
+[ApiController]
+[Route("api/[controller]")]
+public class PhotosController : ControllerBase
+{
+    private readonly IPhotoStorage _photoStorage;
+    private readonly IFileStorage _fileStorage;
+    private readonly ILogger<PhotosController> _logger;
+
+    public PhotosController(IPhotoStorage photoStorage, IFileStorage fileStorage, ILogger<PhotosController> logger)
+    {
+        _photoStorage = photoStorage;
+        _fileStorage = fileStorage;
+        _logger = logger;
+    }
+
+    // --- Публичные фото (доступ без авторизации) ---
+
+    /// <summary>
+    /// Получить публичное фото ресурса (например, офиса, команды)
+    /// </summary>
+    [HttpGet("resources/{resourceId}/avatar/{photoId:guid}")]
+    [AllowAnonymous]
+    [ResponseCache(Duration = 3600, Location = ResponseCacheLocation.Any)]
+    public async Task<IActionResult> GetPublicPhoto(
+        [FromRoute] string resourceId,
+        [FromRoute] Guid photoId,
+        CancellationToken ct)
+    {
+        // Проверяем, существует ли фото в хранилище
+        var photo = await _photoStorage.GetPhotoAsync(resourceId, photoId, ct);
+        if (photo == null || !photo.IsPublic)
+            return NotFound();
+
+        // Генерируем публичную ссылку (без SAS, просто URL)
+        var url = _fileStorage.GetPublicUrl(resourceId, photoId);
+        return Ok(new PhotoUrlResponse(url));
+    }
+
+    /// <summary>
+    /// Получить фото пользователя (публичное, если помечено как public)
+    /// </summary>
+    [HttpGet("users/avatar/{photoId:guid}")]
+    [AllowAnonymous] // но проверяем внутри, является ли фото публичным
+    [ResponseCache(Duration = 3600, Location = ResponseCacheLocation.Any)]
+    public async Task<IActionResult> GetUserPublicPhoto(
+        [FromRoute] Guid photoId,
+        CancellationToken ct)
+    {
+        // Ищем фото по глобальному ID (предполагаем, что оно принадлежит пользователю)
+        var photo = await _photoStorage.GetPhotoByIdAsync(photoId, ct);
+        if (photo == null || !photo.IsPublic)
+            return NotFound();
+
+        // Для публичных фото отдаём прямую ссылку без подписи
+        var url = _fileStorage.GetPublicUrl(photo.OwnerId, photo.Id);
+        return Ok(new PhotoUrlResponse(url));
+    }
+
+    // --- Приватные фото (доступ только авторизованным) ---
+
+    /// <summary>
+    /// Получить приватное фото пользователя (доступ только владельцу или администратору)
+    /// </summary>
+    [HttpGet("users/me/avatar/{photoId:guid}")]
+    [Authorize] // требуется аутентификация
+    [ResponseCache(Duration = 1200, Location = ResponseCacheLocation.Client)]
+    public async Task<IActionResult> GetMyPrivatePhoto(
+        [FromRoute] Guid photoId,
+        CancellationToken ct)
+    {
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (string.IsNullOrEmpty(userId))
+            return Unauthorized();
+
+        var photo = await _photoStorage.GetPhotoAsync(userId, photoId, ct);
+        if (photo == null)
+            return NotFound();
+
+        // Проверяем, что это приватное фото и принадлежит текущему пользователю
+        if (photo.IsPublic)
+            return Forbid(); // или можно разрешить, если публичное – но мы отдаём через отдельный метод
+
+        // Генерируем подписанную ссылку (например, с временным токеном)
+        var expireTime = TimeSpan.FromSeconds(1800);
+        var signedUrl = _fileStorage.GenerateSignedUrl(userId, photoId, expireTime);
+        return Ok(new PhotoUrlResponse(signedUrl, expireTime.TotalMilliseconds));
+    }
+
+    /// <summary>
+    /// Получить приватное фото другого пользователя (только для администраторов)
+    /// </summary>
+    [HttpGet("users/{userId:guid}/avatar/{photoId:guid}")]
+    [Authorize(Roles = "Admin")] // пример ролевой политики
+    [ResponseCache(Duration = 1200, Location = ResponseCacheLocation.Client)]
+    public async Task<IActionResult> GetUserPrivatePhoto(
+        [FromRoute] Guid userId,
+        [FromRoute] Guid photoId,
+        CancellationToken ct)
+    {
+        var photo = await _photoStorage.GetPhotoAsync(userId.ToString(), photoId, ct);
+        if (photo == null)
+            return NotFound();
+
+        // Для админа можно отдать прямую ссылку или тоже подписанную
+        var signedUrl = _fileStorage.GenerateSignedUrl(userId.ToString(), photoId, TimeSpan.FromSeconds(1800));
+        return Ok(new PhotoUrlResponse(signedUrl));
+    }
+
+    // --- Загрузка фото ---
+
+    /// <summary>
+    /// Загрузить своё фото (для текущего пользователя)
+    /// </summary>
+    [HttpPost("users/me/avatar")]
+    [Authorize]
+    [Produces<PhotoCreatedResponse>]
+    public async Task<IActionResult> UploadMyPhoto(
+        [FromForm] IFormFile file,
+        CancellationToken ct)
+    {
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (string.IsNullOrEmpty(userId))
+            return Unauthorized();
+
+        // Валидация файла
+        var validationResult = await ValidateFile(file, ct);
+        if (!validationResult.IsValid)
+            return BadRequest(validationResult.Errors);
+
+        await using var stream = file.OpenReadStream();
+        // Загружаем как временное (не подтверждённое)
+        var photoId = await _photoStorage.UploadTemporaryAsync(userId, stream, TimeSpan.FromHours(1), isPublic: false, ct);
+
+        return Ok(new PhotoCreatedResponse(photoId));
+    }
+
+    /// <summary>
+    /// Загрузить фото для ресурса (например, для офиса) – только для менеджеров ресурса
+    /// </summary>
+    [HttpPost("resources/{resourceId}/avatar")]
+    [Authorize]
+    [Produces<PhotoCreatedResponse>]
+    public async Task<IActionResult> UploadResourcePhoto(
+        [FromRoute] string resourceId,
+        [FromForm] IFormFile file,
+        CancellationToken ct)
+    {
+        // Здесь должна быть проверка прав на управление ресурсом, пропустим для примера
+        var validationResult = await ValidateFile(file, ct);
+        if (!validationResult.IsValid)
+            return BadRequest(validationResult.Errors);
+
+        await using var stream = file.OpenReadStream();
+        // Загружаем как временное, но помечаем как публичное (например, аватарка офиса)
+        var photoId = await _photoStorage.UploadTemporaryAsync(resourceId, stream, TimeSpan.FromHours(1), isPublic: true, ct);
+
+        return Ok(new PhotoCreatedResponse(photoId));
+    }
+
+    // --- Подтверждение фото (перевод из временного в постоянное) ---
+
+    /// <summary>
+    /// Подтвердить загруженное фото (сделать постоянным)
+    /// </summary>
+    [HttpPost("photos/{photoId:guid}/confirm")]
+    [Authorize]
+    public async Task<IActionResult> ConfirmPhoto(
+        [FromRoute] Guid photoId,
+        [FromQuery] Guid? oldPhotoId, // для замены старого фото
+        CancellationToken ct)
+    {
+        // Находим фото по ID (требуется проверка прав на владение)
+        var photo = await _photoStorage.GetPhotoByIdAsync(photoId, ct);
+        if (photo == null)
+            return NotFound();
+
+        // Проверяем, что текущий пользователь владеет этим фото (или имеет права)
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (photo.OwnerId != userId && !User.IsInRole("Admin"))
+            return Forbid();
+
+        // Если передан старый фото ID – удаляем его
+        if (oldPhotoId.HasValue)
+        {
+            await _photoStorage.DeletePhotoAsync(photo.OwnerId, oldPhotoId.Value, ct);
+        }
+
+        // Подтверждаем фото (делаем постоянным)
+        var confirmed = await _photoStorage.ConfirmPhotoAsync(photo.OwnerId, photoId, ct);
+        if (!confirmed)
+            return NotFound(); // или Conflict
+
+        return Ok(new { photoId });
+    }
+
+    // --- Вспомогательные методы ---
+
+    private async Task<ValidationResult> ValidateFile(IFormFile file, CancellationToken ct)
+    {
+        // Простейшая валидация – можно расширить
+        if (file == null)
+            return new ValidationResult(false, new[] { "File is required" });
+
+        if (file.Length > 2 * 1024 * 1024)
+            return new ValidationResult(false, new[] { "Max file size is 2 MB" });
+
+        // Дополнительно можно проверить ContentType
+        var allowedTypes = new[] { "image/jpeg", "image/png", "image/gif" };
+        if (!allowedTypes.Contains(file.ContentType))
+            return new ValidationResult(false, new[] { "Only image files are allowed" });
+
+        return new ValidationResult(true, Array.Empty<string>());
+    }
+
+    // Простой класс для результата валидации
+    private class ValidationResult
+    {
+        public bool IsValid { get; }
+        public string[] Errors { get; }
+
+        public ValidationResult(bool isValid, string[] errors)
+        {
+            IsValid = isValid;
+            Errors = errors;
+        }
+    }
+}
+
+// --- Интерфейсы и модели (можно вынести в отдельные файлы) ---
+
+/// <summary>
+/// Модель фото в хранилище
+/// </summary>
+public class Photo
+{
+    public Guid Id { get; set; }
+    public string OwnerId { get; set; } = string.Empty; // идентификатор владельца (пользователь, офис, доктор)
+    public bool IsPublic { get; set; }
+    public bool IsConfirmed { get; set; }
+    public DateTimeOffset UploadedAt { get; set; }
+}
+
+/// <summary>
+/// Хранилище для управления фото
+/// </summary>
+public interface IPhotoStorage
+{
+    Task<Photo?> GetPhotoAsync(string ownerId, Guid photoId, CancellationToken ct);
+    Task<Photo?> GetPhotoByIdAsync(Guid photoId, CancellationToken ct);
+    Task<Guid> UploadTemporaryAsync(string ownerId, Stream stream, TimeSpan ttl, bool isPublic, CancellationToken ct);
+    Task<bool> ConfirmPhotoAsync(string ownerId, Guid photoId, CancellationToken ct);
+    Task DeletePhotoAsync(string ownerId, Guid photoId, CancellationToken ct);
+}
+
+/// <summary>
+/// Сервис для работы с файлами (генерация URL, подписи и т.д.)
+/// </summary>
+public interface IFileStorage
+{
+    string GetPublicUrl(string ownerId, Guid photoId);
+    string GenerateSignedUrl(string ownerId, Guid photoId, TimeSpan expireTime);
+}

@@ -1,0 +1,5 @@
+<Solution>
+  <Project Path="DiNet.HashSimilarityTK.Console/DiNet.HashSimilarityTK.Console.csproj" />
+  <Project Path="DiNet.HashSimilarityTK.Core/DiNet.HashSimilarityTK.Core.csproj" />
+  <Project Path="DiNet.HashSimilarityTK.Infrastructure/DiNet.HashSimilarityTK.Infrastructure.csproj" Id="d45408c0-f488-4ab9-9e6c-ffd6676aabd6" />
+</Solution>
