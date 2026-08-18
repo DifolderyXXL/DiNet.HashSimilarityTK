@@ -5,5 +5,5 @@ namespace DiNet.HashSimilarityTK.MetricsEngine.Core;
 
 public interface ISimilarityService
 {
-    SimilarityTable ComputeSimilarity(DistinctMatch<DocumentFileLine> match, IDocumentLineCountProvider lineCountProvider);
+    SimilarityTable ComputeSimilarity(DistinctMatch<DocumentFileLine> match, IDocumentStore store);
 }

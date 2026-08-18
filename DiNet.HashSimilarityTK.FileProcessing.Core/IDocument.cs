@@ -1,4 +1,6 @@
-﻿namespace DiNet.HashSimilarityTK.FileProcessing.Core;
+﻿using DiNet.HashSimilarityTK.Core;
+
+namespace DiNet.HashSimilarityTK.FileProcessing.Core;
 
 public interface ITreeRoute
 {
@@ -33,4 +35,4 @@ public interface IDocumentStore
     IEnumerable<IDocument> GetAllDocuments();
 }
 
-public readonly record struct DocumentFileLine(long DocumentId, long Value);
+public readonly record struct DocumentFileLine(long DocumentId, long LineIndex, Hash LineHash);
