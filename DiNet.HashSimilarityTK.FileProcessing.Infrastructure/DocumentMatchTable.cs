@@ -1,6 +1,5 @@
 ﻿using DiNet.HashSimilarityTK.Core;
 using DiNet.HashSimilarityTK.FileProcessing.Core;
-using System.Reflection.PortableExecutable;
 using System.Text;
 
 namespace DiNet.HashSimilarityTK.FileProcessing.Infrastructure;

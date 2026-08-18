@@ -1,4 +1,7 @@
 <Solution>
+  <Folder Name="/Apps/">
+    <Project Path="DiNet.HashSimilarityTK.Cli/DiNet.HashSimilarityTK.Cli.csproj" Id="c4ad6d96-a65c-4860-9950-86e97d42aa69" />
+  </Folder>
   <Folder Name="/FileProcessingEngine/">
     <Project Path="DiNet.HashSimilarityTK.FileProcessing.Core/DiNet.HashSimilarityTK.FileProcessing.Core.csproj" Id="460ce46f-f281-4bc8-beba-ee992aafe2e0" />
     <Project Path="DiNet.HashSimilarityTK.FileProcessing.Infrastructure/DiNet.HashSimilarityTK.FileProcessing.Infrastructure.csproj" Id="5cefb93f-7d66-4b2e-a411-98b585108d5c" />
