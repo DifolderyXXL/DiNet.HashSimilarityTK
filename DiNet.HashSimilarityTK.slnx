@@ -1,5 +1,16 @@
 <Solution>
+  <Folder Name="/FileProcessingEngine/">
+    <Project Path="DiNet.HashSimilarityTK.FileProcessing.Core/DiNet.HashSimilarityTK.FileProcessing.Core.csproj" Id="460ce46f-f281-4bc8-beba-ee992aafe2e0" />
+    <Project Path="DiNet.HashSimilarityTK.FileProcessing.Infrastructure/DiNet.HashSimilarityTK.FileProcessing.Infrastructure.csproj" Id="5cefb93f-7d66-4b2e-a411-98b585108d5c" />
+  </Folder>
+  <Folder Name="/HashSimilarityEngine/">
+    <Project Path="DiNet.HashSimilarityTK.Core/DiNet.HashSimilarityTK.Core.csproj" />
+    <Project Path="DiNet.HashSimilarityTK.Infrastructure/DiNet.HashSimilarityTK.Infrastructure.csproj" Id="d45408c0-f488-4ab9-9e6c-ffd6676aabd6" />
+  </Folder>
+  <Folder Name="/MetricsEngine/">
+    <Project Path="DiNet.HashSimilarityTK.MetricsEngine.Application/DiNet.HashSimilarityTK.MetricsEngine.Application.csproj" Id="3447dac5-f724-46cc-9366-0247bb925ed4" />
+    <Project Path="DiNet.HashSimilarityTK.MetricsEngine.Core/DiNet.HashSimilarityTK.MetricsEngine.Core.csproj" Id="65241386-04b3-44bf-9c48-1bef7f6bae2a" />
+    <Project Path="DiNet.HashSimilarityTK.MetricsEngine.Infrastructure/DiNet.HashSimilarityTK.MetricsEngine.Infrastructure.csproj" Id="6e7ac098-dc4a-4c03-82d4-7706e808b5b1" />
+  </Folder>
   <Project Path="DiNet.HashSimilarityTK.Console/DiNet.HashSimilarityTK.Console.csproj" />
-  <Project Path="DiNet.HashSimilarityTK.Core/DiNet.HashSimilarityTK.Core.csproj" />
-  <Project Path="DiNet.HashSimilarityTK.Infrastructure/DiNet.HashSimilarityTK.Infrastructure.csproj" Id="d45408c0-f488-4ab9-9e6c-ffd6676aabd6" />
 </Solution>

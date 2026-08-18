@@ -1,0 +1,14 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net11.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\DiNet.HashSimilarityTK.FileProcessing.Core\DiNet.HashSimilarityTK.FileProcessing.Core.csproj" />
+    <ProjectReference Include="..\DiNet.HashSimilarityTK.MetricsEngine.Core\DiNet.HashSimilarityTK.MetricsEngine.Core.csproj" />
+  </ItemGroup>
+
+</Project>

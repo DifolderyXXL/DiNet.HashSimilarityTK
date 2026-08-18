@@ -10,10 +10,15 @@
 
   <ItemGroup>
     <ProjectReference Include="..\DiNet.HashSimilarityTK.Core\DiNet.HashSimilarityTK.Core.csproj" />
+    <ProjectReference Include="..\DiNet.HashSimilarityTK.FileProcessing.Core\DiNet.HashSimilarityTK.FileProcessing.Core.csproj" />
+    <ProjectReference Include="..\DiNet.HashSimilarityTK.FileProcessing.Infrastructure\DiNet.HashSimilarityTK.FileProcessing.Infrastructure.csproj" />
     <ProjectReference Include="..\DiNet.HashSimilarityTK.Infrastructure\DiNet.HashSimilarityTK.Infrastructure.csproj" />
   </ItemGroup>
 
   <ItemGroup>
+    <None Update="TestRoot\TextSample1.txt">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Update="TextSample1.txt">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
