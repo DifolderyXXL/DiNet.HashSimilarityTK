@@ -1,0 +1,36 @@
+﻿namespace DiNet.HashSimilarityTK.FileProcessing.Core;
+
+public interface ITreeRoute
+{
+    public string FullPath { get; }
+    public long Id { get; }
+}
+
+public interface IDocument : ITreeRoute
+{
+    public long LineCount { get; }
+    public TextReader OpenTextReader();
+}
+
+public interface IDocumentDirectory : ITreeRoute
+{
+    public long DocumentCount { get; }
+    public long DirectoryCount { get; }
+    public IEnumerable<IDocumentDirectory> GetDirectories();
+    public IEnumerable<IDocument> GetDocuments();
+}
+
+public interface IDocumentMatchTable<TDocumentKey>
+{
+    public Task Add(IDocument document, CancellationToken ct);
+    public IEnumerable<IEnumerable<DocumentFileLine>> GetAllMatches();
+}
+
+public interface IDocumentStore
+{
+    long DocumentCount { get; }
+    IDocument? GetDocument(long id);
+    IEnumerable<IDocument> GetAllDocuments();
+}
+
+public readonly record struct DocumentFileLine(long DocumentId, long Value);
