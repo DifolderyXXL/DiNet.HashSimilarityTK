@@ -10,7 +10,7 @@ public class MatchSet<T> : ITextMatchTable<T>
     public MatchSet(int shingleSize, int numHashes, int chunkStep, uint seed)
     {
         var shingleHasher = new XxHasher(seed);
-        var shingle = new ShingleExtractor(4, shingleHasher);
+        var shingle = new ShingleExtractor(shingleSize, shingleHasher);
 
         var signatureGenerator = SignatureGeneratorFactory.Create(seed, numHashes);
         var textSignature = new TextSignatureGenerator(shingle, signatureGenerator);
@@ -18,7 +18,7 @@ public class MatchSet<T> : ITextMatchTable<T>
         var bucketHasher = new XxHasher(seed + 1000);
         var matchBucket = new DictionaryHashMatchBucker<T>(chunkStep, bucketHasher);
 
-        _matchTable = new TextMatchTable<T>(matchBucket, textSignature);
+        _matchTable = new TextMatchTable<T>(matchBucket, textSignature, numHashes);
     }
 
     public long Count => _matchTable.Count;

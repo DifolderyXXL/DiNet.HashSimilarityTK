@@ -20,6 +20,7 @@ var shingleSize = cli.GetInt("--shingleSize", 4);
 var numHashes = cli.GetInt("--numHashes", 128);
 var chunkStep = cli.GetInt("--chunkStep", 16);
 var seed = cli.GetInt("--seed", 123456789);
+var ignore = cli.GetFlagArgument("--ignore");
 
 
 try
@@ -34,7 +35,7 @@ try
     );
 
 
-    var fileSystem = new SimpleFileSystem();
+    var fileSystem = new GitIgnoredFileSystem(ignore);
     var indexer = new DocumentIndexer(fileSystem);
 
     var store = indexer.BuildIndex(rootPath);
@@ -42,19 +43,18 @@ try
 
     var processingService = new DocumentProcessingService(
         store,
+        new XxHasher((uint)seed),
         matchTable,
-        (document, line) => new DocumentFileLine(document.Id, line)
+        (document, hash, line) => new DocumentFileLine(document.Id, line, hash)
     );
 
     await processingService.ProcessAllDocumentsAsync(default);
-
-
 
     var groups = matchTable.EnumerateAllMatchings()
         .ToDistinctGroups();
 
     var jaccard = new JaccardSimilarityService();
-    var scores = jaccard.ComputeSimilarity(groups, new DocumentLineCountProvider(store));
+    var scores = jaccard.ComputeSimilarity(groups, store);
 
 
     Console.WriteLine($"Top {top} most similar files in: {rootPath}");
@@ -77,9 +77,9 @@ try
         Console.WriteLine($"{fileA} <-> {fileB} : {score.Similarity * 100:F2}%");
     }
 }
-catch(Exception e)
+catch (Exception e)
 {
-    Console.WriteLine($"Error: {e.Message}");
+    Console.WriteLine($"Error: {e.Message}; {e.StackTrace}");
     return 1;
 }
 

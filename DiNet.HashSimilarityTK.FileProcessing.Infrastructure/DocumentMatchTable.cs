@@ -62,7 +62,7 @@ public class Document(IFileSystem fileSystem, string fullPath, long id) : IDocum
         return new StreamReader(stream, Encoding.UTF8, detectEncodingFromByteOrderMarks: true);
     }
 
-
+    public HashSet<Hash> StringHashes { get; } = new HashSet<Hash>();
     private long? _lineCount;
 
     public long LineCount
@@ -157,8 +157,9 @@ public class DocumentStore : IDocumentStore
 
 public class DocumentProcessingService(
     IDocumentStore store,
+    IHasher hasher,
     ITextMatchTable<DocumentFileLine> matchTable,
-    Func<IDocument, long, DocumentFileLine> indexer)
+    Func<IDocument, Hash, long, DocumentFileLine> indexer)
 {
 
     public async Task ProcessAllDocumentsAsync(CancellationToken ct)
@@ -170,8 +171,14 @@ public class DocumentProcessingService(
             string? line;
             while ((line = await reader.ReadLineAsync(ct)) != null)
             {
-                var key = indexer(doc, lineNumber);
+                var hash = hasher.Hash(Encoding.UTF8.GetBytes(line));
+                var key = indexer(doc, hash, lineNumber);
                 matchTable.Add(line, key);
+
+                if (doc is Document concreteDoc)
+                    concreteDoc.StringHashes.Add(hash);
+
+
                 lineNumber++;
             }
 
