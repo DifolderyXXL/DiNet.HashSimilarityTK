@@ -1,0 +1,27 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net11.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+
+	  <PackAsTool>true</PackAsTool>
+	  <ToolCommandName>hsim</ToolCommandName>
+	  <PackageOutputPath>./nupkg</PackageOutputPath>
+
+	  <Version>0.0.1</Version>
+	  <Description>CLI tool for detecting similar files using HashSimilarityTK</Description>
+	  <Authors>DifolderyXXL</Authors>
+	  <PackageTags>similarity;hash;cli;tool</PackageTags>
+	  <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\DiNet.HashSimilarityTK.FileProcessing.Core\DiNet.HashSimilarityTK.FileProcessing.Core.csproj" />
+    <ProjectReference Include="..\DiNet.HashSimilarityTK.FileProcessing.Infrastructure\DiNet.HashSimilarityTK.FileProcessing.Infrastructure.csproj" />
+    <ProjectReference Include="..\DiNet.HashSimilarityTK.Infrastructure\DiNet.HashSimilarityTK.Infrastructure.csproj" />
+    <ProjectReference Include="..\DiNet.HashSimilarityTK.MetricsEngine.Application\DiNet.HashSimilarityTK.MetricsEngine.Application.csproj" />
+    <ProjectReference Include="..\DiNet.HashSimilarityTK.MetricsEngine.Infrastructure\DiNet.HashSimilarityTK.MetricsEngine.Infrastructure.csproj" />
+  </ItemGroup>
+</Project>
