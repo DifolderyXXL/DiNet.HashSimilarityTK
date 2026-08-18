@@ -13,6 +13,8 @@
     <ProjectReference Include="..\DiNet.HashSimilarityTK.FileProcessing.Core\DiNet.HashSimilarityTK.FileProcessing.Core.csproj" />
     <ProjectReference Include="..\DiNet.HashSimilarityTK.FileProcessing.Infrastructure\DiNet.HashSimilarityTK.FileProcessing.Infrastructure.csproj" />
     <ProjectReference Include="..\DiNet.HashSimilarityTK.Infrastructure\DiNet.HashSimilarityTK.Infrastructure.csproj" />
+    <ProjectReference Include="..\DiNet.HashSimilarityTK.MetricsEngine.Application\DiNet.HashSimilarityTK.MetricsEngine.Application.csproj" />
+    <ProjectReference Include="..\DiNet.HashSimilarityTK.MetricsEngine.Infrastructure\DiNet.HashSimilarityTK.MetricsEngine.Infrastructure.csproj" />
   </ItemGroup>
 
   <ItemGroup>

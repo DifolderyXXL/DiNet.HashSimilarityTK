@@ -23,7 +23,7 @@ public class DocumentMatchTable<TDocumentKey>(
     }
 
     public IEnumerable<IEnumerable<DocumentFileLine>> GetAllMatches()
-        => matchTable.EnumerateAllMatchings();
+        => matchTable.EnumerateAllMatchings().Result;
 }
 
 
