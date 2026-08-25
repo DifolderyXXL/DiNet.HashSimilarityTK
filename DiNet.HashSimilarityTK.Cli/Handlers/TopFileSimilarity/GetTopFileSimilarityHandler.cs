@@ -1,5 +1,5 @@
-﻿using DiNet.HashSimilarityTK.Cli.Abstraction;
-using DiNet.HashSimilarityTK.Cli.Abstraction.Results;
+﻿using DiNet.HashSimilarityTK.CliToolkit.Abstraction;
+using DiNet.HashSimilarityTK.CliToolkit.Abstraction.Results;
 
 namespace DiNet.HashSimilarityTK.Cli.Handlers.TopFileSimilarity;
 

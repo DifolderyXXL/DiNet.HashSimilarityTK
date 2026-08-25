@@ -22,6 +22,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\DiNet.HashSimilarityTK.CliToolkit\DiNet.HashSimilarityTK.CliToolkit.csproj" />
     <ProjectReference Include="..\DiNet.HashSimilarityTK.FileProcessing.Core\DiNet.HashSimilarityTK.FileProcessing.Core.csproj" />
     <ProjectReference Include="..\DiNet.HashSimilarityTK.FileProcessing.Infrastructure\DiNet.HashSimilarityTK.FileProcessing.Infrastructure.csproj" />
     <ProjectReference Include="..\DiNet.HashSimilarityTK.Infrastructure\DiNet.HashSimilarityTK.Infrastructure.csproj" />

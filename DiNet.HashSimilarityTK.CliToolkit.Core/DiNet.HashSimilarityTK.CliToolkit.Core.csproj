@@ -6,8 +6,4 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="..\DiNet.HashSimilarityTK.CliToolkit.Core\DiNet.HashSimilarityTK.CliToolkit.Core.csproj" />
-  </ItemGroup>
-
 </Project>
