@@ -20,9 +20,9 @@ public class CalculateHashQueryHandler : IQueryHandler<CalculateHashQuery, HashR
     }
 }
 
-public class HashResultResponsePresenter : IConsolePresenter<HashResultResponse>
+public class HashResultResponsePresenter : IDataPresenter<HashResultResponse>
 {
-    public void Render(HashResultResponse response)
+    public void Present(HashResultResponse response)
     {
         Console.ForegroundColor = ConsoleColor.DarkGray;
         Console.Write($"[{response.Algorithm}] ");

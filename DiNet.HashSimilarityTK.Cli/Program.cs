@@ -4,14 +4,27 @@ using DiNet.HashSimilarityTK.FileProcessing.Core;
 using DiNet.HashSimilarityTK.FileProcessing.Infrastructure;
 using DiNet.HashSimilarityTK.Infrastructure;
 using DiNet.HashSimilarityTK.MetricsEngine.Application;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 
-var app = new CliApplicationBuilder()
-    .RegisterHandler<CalculateHashQuery, HashResultResponse, CalculateHashQueryHandler>("hash")
-    .RegisterPresenter<HashResultResponse, HashResultResponsePresenter>()
-    .Build();
+var builder = Host.CreateApplicationBuilder(args);
+
+builder.Services.AddCliToolkit(c =>
+{
+    c.RegisterHandler<CalculateHashQueryHandler>("hash");
+
+    c.RegisterPresenter<HashResultResponsePresenter>();
+});
+
+
+using var host = builder.Build();
 
 string[] argss = ["hash", "--FilePath=appsettings.json", "--Algorithm=SHA1"];
-await app.Route(argss, CancellationToken.None);
+
+
+var cliApp = host.Services.GetRequiredService<CliApplication>();
+await cliApp.Route(argss, CancellationToken.None);
+
 
 
 return 0;
