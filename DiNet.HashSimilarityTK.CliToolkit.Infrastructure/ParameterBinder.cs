@@ -28,7 +28,7 @@ public class ParameterBinder(IParameterDeserializer serializer) : IParameterBind
             var parameterFromConstructor = caller.Parameters.FirstOrDefault(x => string.Equals(x.FormattedName, p.Name));
 
             if (parameterFromConstructor == null)
-                throw new InvalidParameterProvidedException();
+                throw new InvalidParameterProvidedException($"Name: '{p.Name}'; value: '{p.Value}'");
 
             var info = parameterFromConstructor.Parameter;
 

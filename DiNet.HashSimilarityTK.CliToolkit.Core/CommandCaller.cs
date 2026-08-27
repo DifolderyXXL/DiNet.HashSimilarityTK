@@ -25,6 +25,8 @@ public class CommandCaller
         Type = constructor.DeclaringType!;
     }
 
+
+
     /// <summary>
     /// Static factory method to generate valid caller metadata
     /// </summary>
@@ -32,9 +34,9 @@ public class CommandCaller
     /// <param name="formatter">Formatter converts names of command constructor parameters</param>
     /// <returns>Caller metadata</returns>
     /// <exception cref="IncorrectCommandDefenitionException"></exception>
-    public static CommandCaller CreateFor<T>(ICommandNameFormatter formatter)
+    public static CommandCaller CreateFor(Type type, ICommandNameFormatter formatter)
     {
-        ConstructorInfo constructor = typeof(T).GetConstructors()
+        ConstructorInfo constructor = type.GetConstructors()
             .Single();
 
         ParameterInfo[] parameters = constructor.GetParameters();
@@ -70,5 +72,10 @@ public class CommandCaller
             throw new IncorrectCommandDefenitionException("Duplicated names after formatting");
 
         return new CommandCaller(constructor, firstUnflagged, transformedParameters);
+    }
+
+    public static CommandCaller CreateFor<T>(ICommandNameFormatter formatter)
+    {
+        return CreateFor(typeof(T), formatter);
     }
 }

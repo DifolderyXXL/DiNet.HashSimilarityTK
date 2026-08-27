@@ -8,6 +8,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\DiNet.HashSimilarityTK.CliToolkit.Core\DiNet.HashSimilarityTK.CliToolkit.Core.csproj" />
+    <ProjectReference Include="..\DiNet.HashSimilarityTK.CliToolkit.Infrastructure\DiNet.HashSimilarityTK.CliToolkit.Infrastructure.csproj" />
   </ItemGroup>
 
 </Project>

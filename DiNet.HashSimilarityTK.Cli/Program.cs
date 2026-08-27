@@ -1,9 +1,20 @@
 ﻿using DiNet.HashSimilarityTK.Cli;
+using DiNet.HashSimilarityTK.CliToolkit.Services;
 using DiNet.HashSimilarityTK.FileProcessing.Core;
 using DiNet.HashSimilarityTK.FileProcessing.Infrastructure;
 using DiNet.HashSimilarityTK.Infrastructure;
 using DiNet.HashSimilarityTK.MetricsEngine.Application;
-using DiNet.HashSimilarityTK.MetricsEngine.Infrastructure;
+
+var app = new CliApplicationBuilder()
+    .RegisterHandler<CalculateHashQuery, HashResultResponse, CalculateHashQueryHandler>("hash")
+    .RegisterPresenter<HashResultResponse, HashResultResponsePresenter>()
+    .Build();
+
+string[] argss = ["hash", "--FilePath=appsettings.json", "--Algorithm=SHA1"];
+await app.Route(argss, CancellationToken.None);
+
+
+return 0;
 
 
 var cli = CliArgumentHelper.Create(args);

@@ -3,7 +3,7 @@ using DiNet.HashSimilarityTK.CliToolkit.Abstraction.Results;
 
 namespace DiNet.HashSimilarityTK.Cli.Handlers.TopFileSimilarity;
 
-public record GetTopFileSimilarityQuery() : IQuery<GetTopFileSimilarityResponse>;
+/*public record GetTopFileSimilarityQuery() : IQuery<GetTopFileSimilarityResponse>;
 public record GetTopFileSimilarityResponse();
 internal class GetTopFileSimilarityHandler : IQueryHandler<GetTopFileSimilarityQuery, GetTopFileSimilarityResponse>
 {
@@ -12,3 +12,4 @@ internal class GetTopFileSimilarityHandler : IQueryHandler<GetTopFileSimilarityQ
         throw new NotImplementedException();
     }
 }
+*/

@@ -13,4 +13,12 @@ public class CommandCallerStore : ICommandCallerStore
 
         return null;
     }
+
+    public CommandCaller? Get(Type type)
+    {
+        if (_callers.TryGetValue(type, out var caller))
+            return caller;
+
+        return null;
+    }
 }
