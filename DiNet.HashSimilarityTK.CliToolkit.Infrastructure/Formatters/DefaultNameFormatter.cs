@@ -1,6 +1,6 @@
 ﻿using DiNet.HashSimilarityTK.CliToolkit.Core.Intrerfaces;
 
-namespace DiNet.HashSimilarityTK.CliToolkit.Infrastructure;
+namespace DiNet.HashSimilarityTK.CliToolkit.Infrastructure.Formatters;
 
 public class DefaultNameFormatter : ICommandNameFormatter
 {

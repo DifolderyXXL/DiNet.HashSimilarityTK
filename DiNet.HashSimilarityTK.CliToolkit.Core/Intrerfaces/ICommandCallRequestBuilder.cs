@@ -1,6 +1,6 @@
 ﻿using DiNet.HashSimilarityTK.CliToolkit.Core.Models;
 
-namespace DiNet.HashSimilarityTK.CliToolkit.Services;
+namespace DiNet.HashSimilarityTK.CliToolkit.Core.Intrerfaces;
 
 public interface ICommandCallRequestBuilder
 {

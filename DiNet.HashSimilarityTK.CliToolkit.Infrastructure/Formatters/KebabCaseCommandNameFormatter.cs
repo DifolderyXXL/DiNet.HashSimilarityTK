@@ -2,7 +2,7 @@
 using System.Text.RegularExpressions;
 
 
-namespace DiNet.HashSimilarityTK.CliToolkit.Services;
+namespace DiNet.HashSimilarityTK.CliToolkit.Infrastructure.Formatters;
 
 public class KebabCaseCommandNameFormatter : ICommandNameFormatter
 {

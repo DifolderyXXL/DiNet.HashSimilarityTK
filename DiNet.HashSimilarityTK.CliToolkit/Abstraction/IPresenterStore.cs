@@ -1,6 +1,4 @@
-﻿using DiNet.HashSimilarityTK.CliToolkit.Abstraction;
-
-namespace DiNet.HashSimilarityTK.CliToolkit.Services;
+﻿namespace DiNet.HashSimilarityTK.CliToolkit.Abstraction;
 
 public interface IPresenterStore
 {

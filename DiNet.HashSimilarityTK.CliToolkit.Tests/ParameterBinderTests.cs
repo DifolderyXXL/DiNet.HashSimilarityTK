@@ -4,6 +4,7 @@ using DiNet.HashSimilarityTK.CliToolkit.Core.Exceptions;
 using DiNet.HashSimilarityTK.CliToolkit.Core.Intrerfaces;
 using DiNet.HashSimilarityTK.CliToolkit.Core.Models;
 using DiNet.HashSimilarityTK.CliToolkit.Infrastructure;
+using DiNet.HashSimilarityTK.CliToolkit.Infrastructure.Formatters;
 
 namespace DiNet.HashSimilarityTK.CliToolkit.Tests;
 
@@ -126,7 +127,7 @@ public class ParameterBinderTests
         var caller = CommandCaller.CreateFor<SampleHandler>(_formatter);
         var request = new CommandCallRequest(
             null,
-            new[] { new ConsoleParameter("name", "Alice") } // id отсутствует
+            new[] { new ConsoleParameter("name", "Alice") }
         );
 
         Assert.Throws<IncorrectCommandStructureException>(() => _binder.Bind(caller, request));

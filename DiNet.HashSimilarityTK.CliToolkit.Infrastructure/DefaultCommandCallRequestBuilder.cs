@@ -1,9 +1,10 @@
 ﻿using DiNet.HashSimilarityTK.CliToolkit.Core.Models;
+using DiNet.HashSimilarityTK.CliToolkit.Core.Intrerfaces;
 
-namespace DiNet.HashSimilarityTK.CliToolkit.Services;
+namespace DiNet.HashSimilarityTK.CliToolkit.Infrastructure;
 
 public class DefaultCommandCallRequestBuilder : ICommandCallRequestBuilder
-{
+{   
     public CommandCallRequest Build(ReadOnlySpan<string> args)
     {
         string? firstUnflagged = null;

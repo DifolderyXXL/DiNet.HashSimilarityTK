@@ -1,6 +1,7 @@
 ﻿using DiNet.HashSimilarityTK.CliToolkit.Abstraction;
 using DiNet.HashSimilarityTK.CliToolkit.Core.Intrerfaces;
 using DiNet.HashSimilarityTK.CliToolkit.Infrastructure;
+using DiNet.HashSimilarityTK.CliToolkit.Infrastructure.Formatters;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace DiNet.HashSimilarityTK.CliToolkit.Services;
@@ -16,13 +17,14 @@ public static class ServiceCollectionExtensions
         services.AddSingleton(routeRegistry);
         services.AddSingleton<IPresenterStore>(presenterStore);
 
+
         services.AddSingleton<ICommandNameFormatter, DefaultNameFormatter>();
-        services.AddSingleton<ICommandCallerStore, ForcedCommandCallerStore>();
+        services.AddSingleton<ICommandCallerStore, ReflectionCommandCallerStore>();
         services.AddSingleton<IParameterDeserializer, ParameterDeserializer>();
         services.AddSingleton<IParameterBinder, ParameterBinder>();
-        services.AddSingleton<ICommandCallRequestBuilder, DefaultCommandCallRequestBuilder>();
+        services.AddSingleton<ICommandCallRequestBuilder, StrictCommandCallRequestBuilder>();
 
-        services.AddTransient<CommandHandlerResolver>();
+        services.AddTransient<ICommandHandlerFactory, CommandHandlerFactory>();
         services.AddTransient<IQueryHandlerResolver, DefaultQueryHandlerResolver>();
         services.AddTransient<IPresenterResolver, PresenterResolver>();
 
@@ -59,6 +61,14 @@ public class ServiceCollectionExtensionContext(CommandRouteRegistry registry, Pr
         presenter.Register<TPresenter>();
 
         collection.AddTransient<TPresenter>();
+
+        return this;
+    }
+
+
+    public ServiceCollectionExtensionContext WithCustomFormatting<T>() where T : class, ICommandNameFormatter
+    {
+        collection.AddSingleton<ICommandNameFormatter, T>();
 
         return this;
     }

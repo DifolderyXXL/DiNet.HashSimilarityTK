@@ -13,7 +13,7 @@ public class ParameterBinder(IParameterDeserializer serializer) : IParameterBind
 
         if (caller.FirstUnflaggedParameter != null)
         {
-            var isRequired = !caller.FirstUnflaggedParameter.IsOptional;
+            var isRequired = !(caller.FirstUnflaggedParameter.IsOptional);
             if (isRequired && request.FirstUnflaggedArgument == null)
                 throw new IncorrectCommandStructureException();
 

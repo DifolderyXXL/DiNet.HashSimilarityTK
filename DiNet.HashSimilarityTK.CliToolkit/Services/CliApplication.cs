@@ -1,7 +1,10 @@
-﻿namespace DiNet.HashSimilarityTK.CliToolkit.Services;
+﻿using DiNet.HashSimilarityTK.CliToolkit.Core.Intrerfaces;
+using DiNet.HashSimilarityTK.CliToolkit.Abstraction;
+
+namespace DiNet.HashSimilarityTK.CliToolkit.Services;
 
 public class CliApplication(
-    CommandHandlerResolver resolver,
+    ICommandHandlerFactory resolver,
     ICommandCallRequestBuilder commandCallRequestBuilder,
     IQueryHandlerResolver queryHandlerResolver,
     IPresenterResolver presenterResolver,
@@ -17,7 +20,7 @@ public class CliApplication(
         var handler = queryHandlerResolver.Resolve(type);
 
         var queryArgs = args.Length > 1 ? args.AsSpan(1) : ReadOnlySpan<string>.Empty;
-        var query = resolver.Resolve(handler.QueryType, commandCallRequestBuilder.Build(queryArgs));
+        var query = resolver.Create(handler.QueryType, commandCallRequestBuilder.Build(queryArgs));
 
         var response = await handler.HandleAsync(query, ct);
 
@@ -27,10 +30,6 @@ public class CliApplication(
             if (presenter is not null)
             {
                 presenter.Present(response);
-            }
-            else
-            {
-                Console.WriteLine(response.ToString());
             }
         }
     }

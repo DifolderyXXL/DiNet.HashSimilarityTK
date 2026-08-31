@@ -1,8 +1,9 @@
 ﻿using DiNet.HashSimilarityTK.CliToolkit.Abstraction;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace DiNet.HashSimilarityTK.CliToolkit.Services;
 
-public class DefaultQueryHandlerResolver : IQueryHandlerResolver
+public class DefaultQueryHandlerResolver(IServiceProvider provider) : IQueryHandlerResolver
 {
     public IUntypedQueryHandler Resolve(Type handlerType)
     {
@@ -14,7 +15,7 @@ public class DefaultQueryHandlerResolver : IQueryHandlerResolver
         var queryType = genericArgs[0];
         var responseType = genericArgs[1];
 
-        var rawHandler = Activator.CreateInstance(handlerType)
+        var rawHandler = ActivatorUtilities.CreateInstance(provider, handlerType)
             ?? throw new InvalidOperationException($"Could not instantiate {handlerType.Name}");
 
         var decoratorType = typeof(UntypedQueryHandlerDecorator<,>).MakeGenericType(queryType, responseType);
