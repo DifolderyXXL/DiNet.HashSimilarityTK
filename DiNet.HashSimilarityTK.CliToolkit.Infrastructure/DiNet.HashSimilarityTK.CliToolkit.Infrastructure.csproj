@@ -10,4 +10,8 @@
     <ProjectReference Include="..\DiNet.HashSimilarityTK.CliToolkit.Core\DiNet.HashSimilarityTK.CliToolkit.Core.csproj" />
   </ItemGroup>
 
+	<ItemGroup>
+
+		<PackageReference Include="Humanizer.Core" Version="3.0.10" />
+	</ItemGroup>
 </Project>

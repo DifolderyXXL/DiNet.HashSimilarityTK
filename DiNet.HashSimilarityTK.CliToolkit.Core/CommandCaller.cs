@@ -34,7 +34,7 @@ public class CommandCaller
     /// <param name="formatter">Formatter converts names of command constructor parameters</param>
     /// <returns>Caller metadata</returns>
     /// <exception cref="IncorrectCommandDefenitionException"></exception>
-    public static CommandCaller CreateFor(Type type, ICommandNameFormatter formatter)
+    public static CommandCaller CreateFor(Type type, INameFormatter formatter)
     {
         ConstructorInfo constructor = type.GetConstructors()
             .Single();
@@ -74,7 +74,7 @@ public class CommandCaller
         return new CommandCaller(constructor, firstUnflagged, transformedParameters);
     }
 
-    public static CommandCaller CreateFor<T>(ICommandNameFormatter formatter)
+    public static CommandCaller CreateFor<T>(INameFormatter formatter)
     {
         return CreateFor(typeof(T), formatter);
     }

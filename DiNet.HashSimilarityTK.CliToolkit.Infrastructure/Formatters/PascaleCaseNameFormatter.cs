@@ -1,15 +1,16 @@
 ﻿using DiNet.HashSimilarityTK.CliToolkit.Core.Intrerfaces;
-using System.Text.RegularExpressions;
+using Humanizer;
 
 
 namespace DiNet.HashSimilarityTK.CliToolkit.Infrastructure.Formatters;
 
-public class KebabCaseCommandNameFormatter : ICommandNameFormatter
+public class PascaleCaseNameFormatter : INameFormatter
 {
     public string Format(string name)
     {
         if (string.IsNullOrWhiteSpace(name)) return string.Empty;
 
-        return Regex.Replace(name, @"(?<!^)(?=[A-Z])", "-").ToLowerInvariant();
+        return name.Pascalize();
     }
 }
+

@@ -3,7 +3,7 @@ using DiNet.HashSimilarityTK.CliToolkit.Core.Intrerfaces;
 
 namespace DiNet.HashSimilarityTK.CliToolkit.Infrastructure;
 
-public class ReflectionCommandCallerStore(ICommandNameFormatter formatter) : ICommandCallerStore
+public class ReflectionCommandCallerStore(INameFormatter formatter) : ICommandCallerStore
 {
     public CommandCaller? Get<T>()
     {

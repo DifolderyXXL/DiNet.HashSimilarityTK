@@ -2,7 +2,7 @@
 
 namespace DiNet.HashSimilarityTK.CliToolkit.Infrastructure.Formatters;
 
-public class DefaultNameFormatter : ICommandNameFormatter
+public class DefaultNameFormatter : INameFormatter
 {
     public string Format(string rawName)
         => rawName;

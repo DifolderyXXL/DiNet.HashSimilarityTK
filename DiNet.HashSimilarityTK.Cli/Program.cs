@@ -5,9 +5,12 @@ using Microsoft.Extensions.Hosting;
 
 var builder = Host.CreateApplicationBuilder(args);
 
-builder.Services.AddCliToolkit(c =>
+builder.Services.AddCliToolkit(cli =>
 {
-    c.RegisterHandler<GetTopFileSimilarityHandler>("top");
+    cli.UseKebabCaseFormatter();
+
+    cli.Handlers
+        .Register<GetTopFileSimilarityHandler>("top");
 });
 
 

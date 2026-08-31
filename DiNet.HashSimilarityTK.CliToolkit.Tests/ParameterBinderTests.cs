@@ -46,7 +46,7 @@ public class SampleHandler
 public class ParameterBinderTests
 {
     private readonly ParameterBinder _binder;
-    private readonly ICommandNameFormatter _formatter = new DefaultNameFormatter();
+    private readonly INameFormatter _formatter = new DefaultNameFormatter();
 
     public ParameterBinderTests()
     {

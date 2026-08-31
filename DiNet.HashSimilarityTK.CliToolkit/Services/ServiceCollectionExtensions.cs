@@ -8,68 +8,116 @@ namespace DiNet.HashSimilarityTK.CliToolkit.Services;
 
 public static class ServiceCollectionExtensions
 {
-    public static IServiceCollection AddCliToolkit(this IServiceCollection services, Action<ServiceCollectionExtensionContext>? configure = null)
+    public static IServiceCollection AddCliToolkit(
+        this IServiceCollection services,
+        Action<CliToolkitBuilder> configure)
     {
-        var routeRegistry = new CommandRouteRegistry();
-        var presenterStore = new PresenterStore();
-        configure?.Invoke(new(routeRegistry, presenterStore, services));
-
-        services.AddSingleton(routeRegistry);
-        services.AddSingleton<IPresenterStore>(presenterStore);
-
-
-        services.AddSingleton<ICommandNameFormatter, DefaultNameFormatter>();
-        services.AddSingleton<ICommandCallerStore, ReflectionCommandCallerStore>();
-        services.AddSingleton<IParameterDeserializer, ParameterDeserializer>();
-        services.AddSingleton<IParameterBinder, ParameterBinder>();
-        services.AddSingleton<ICommandCallRequestBuilder, StrictCommandCallRequestBuilder>();
-
-        services.AddTransient<ICommandHandlerFactory, CommandHandlerFactory>();
-        services.AddTransient<IQueryHandlerResolver, DefaultQueryHandlerResolver>();
-        services.AddTransient<IPresenterResolver, PresenterResolver>();
-
-        services.AddTransient<CliApplication>();
-
+        var builder = new CliToolkitBuilder(services);
+        configure(builder);
+        builder.Build();
         return services;
     }
 }
 
-public class ServiceCollectionExtensionContext(CommandRouteRegistry registry, PresenterStore presenter, IServiceCollection collection)
+public class CliToolkitBuilder
 {
-    public ServiceCollectionExtensionContext RegisterHandler<T>(string route) where T : class
+    private readonly IServiceCollection _services;
+    private readonly CommandRouteRegistry _routeRegistry;
+    private readonly PresenterStore _presenterStore;
+    private Type? _formatterType;
+
+    public CliToolkitBuilder(IServiceCollection services)
     {
-        registry.Register<T>(route);
+        _services = services;
+        _routeRegistry = new CommandRouteRegistry();
+        _presenterStore = new PresenterStore();
+    }
 
-        collection.AddTransient<T>();
+    public HandlerRegistry Handlers => new(_routeRegistry, _services);
 
+    public PresenterRegistry Presenters => new(_presenterStore, _services);
+
+    public CliToolkitBuilder UseKebabCaseFormatter()
+    {
+        _formatterType = typeof(KebabCaseNameFormatter);
         return this;
     }
 
-    public ServiceCollectionExtensionContext RegisterPresenter<TResponse, TPresenter>()
-            where TPresenter : class, IDataPresenter<TResponse>
+    public CliToolkitBuilder UseCamelCaseFormatter()
     {
-        presenter.Register<TResponse, TPresenter>();
-
-        collection.AddTransient<TPresenter>();
-
+        _formatterType = typeof(CamelCaseNameFormatter);
         return this;
     }
 
-    public ServiceCollectionExtensionContext RegisterPresenter<TPresenter>()
-        where TPresenter : class
+    public CliToolkitBuilder UseCaseFormatter<T>() where T : class, INameFormatter
     {
-        presenter.Register<TPresenter>();
-
-        collection.AddTransient<TPresenter>();
-
+        _formatterType = typeof(T);
         return this;
     }
 
-
-    public ServiceCollectionExtensionContext WithCustomFormatting<T>() where T : class, ICommandNameFormatter
+    public CliToolkitBuilder UseFormatter<TFormatter>()
+        where TFormatter : class, INameFormatter
     {
-        collection.AddSingleton<ICommandNameFormatter, T>();
+        _formatterType = typeof(TFormatter);
+        return this;
+    }
 
+    internal void Build()
+    {
+        _services.AddSingleton(_routeRegistry);
+        _services.AddSingleton<IPresenterStore>(_presenterStore);
+
+        var formatterType = _formatterType ?? typeof(DefaultNameFormatter);
+        _services.AddSingleton(typeof(INameFormatter), formatterType);
+
+        _services.AddSingleton<ICommandCallerStore, ReflectionCommandCallerStore>();
+        _services.AddSingleton<IParameterDeserializer, ParameterDeserializer>();
+        _services.AddSingleton<IParameterBinder, ParameterBinder>();
+        _services.AddSingleton<ICommandCallRequestBuilder, StrictCommandCallRequestBuilder>();
+
+        _services.AddTransient<ICommandHandlerFactory, CommandHandlerFactory>();
+        _services.AddTransient<IQueryHandlerResolver, DefaultQueryHandlerResolver>();
+        _services.AddTransient<IPresenterResolver, PresenterResolver>();
+
+        _services.AddTransient<CliApplication>();
+    }
+}
+
+public class HandlerRegistry
+{
+    private readonly CommandRouteRegistry _registry;
+    private readonly IServiceCollection _services;
+
+    public HandlerRegistry(CommandRouteRegistry registry, IServiceCollection services)
+    {
+        _registry = registry;
+        _services = services;
+    }
+
+    public HandlerRegistry Register<THandler>(string route) where THandler : class
+    {
+        _registry.Register<THandler>(route);
+        _services.AddTransient<THandler>();
+        return this;
+    }
+}
+
+public class PresenterRegistry
+{
+    private readonly PresenterStore _store;
+    private readonly IServiceCollection _services;
+
+    public PresenterRegistry(PresenterStore store, IServiceCollection services)
+    {
+        _store = store;
+        _services = services;
+    }
+
+    public PresenterRegistry Register<TResponse, TPresenter>()
+        where TPresenter : class, IDataPresenter<TResponse>
+    {
+        _store.Register<TResponse, TPresenter>();
+        _services.AddTransient<TPresenter>();
         return this;
     }
 }

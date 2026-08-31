@@ -1,6 +1,6 @@
 ﻿namespace DiNet.HashSimilarityTK.CliToolkit.Core.Intrerfaces;
 
-public interface ICommandNameFormatter
+public interface INameFormatter
 {
     public string Format(string rawName);
 }
