@@ -158,6 +158,7 @@ public class DocumentProcessingService(
     IDocumentStore store,
     IHasher hasher,
     ITextMatchTable<DocumentFileLine> matchTable,
+    IDocumentLineFilter filter,
     Func<IDocument, Hash, long, DocumentFileLine> indexer)
 {
 
@@ -170,13 +171,15 @@ public class DocumentProcessingService(
             string? line;
             while ((line = await reader.ReadLineAsync(ct)) != null)
             {
-                var hash = hasher.Hash(Encoding.UTF8.GetBytes(line));
-                var key = indexer(doc, hash, lineNumber);
-                matchTable.Add(line, key);
+                if(filter.FilterLine(line))
+                {
+                    var hash = hasher.Hash(Encoding.UTF8.GetBytes(line));
+                    var key = indexer(doc, hash, lineNumber);
+                    matchTable.Add(line, key);
 
-                if (doc is Document concreteDoc)
-                    concreteDoc.StringHashes.Add(hash);
-
+                    if (doc is Document concreteDoc)
+                        concreteDoc.StringHashes.Add(hash);
+                }
 
                 lineNumber++;
             }

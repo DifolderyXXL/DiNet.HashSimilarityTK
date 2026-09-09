@@ -78,11 +78,11 @@ public class StraightSimilarityBlockService
         }
     }
 
-    public SequenceResult? ComputeSimilarity(DistinctMatch<DocumentFileLine> match, long maxBucketSizeLimit)
+    public SequenceResult? ComputeSimilarity(DistinctMatch<DocumentFileLine> match, long maxBucketSizeLimit, bool compareDifferentDocuments)
     {
         var groups = match.Result;
 
-        var pairs = CalculateIntersections(match, maxBucketSizeLimit);
+        var pairs = CalculateIntersections(match, maxBucketSizeLimit, compareDifferentDocuments);
 
 
         pairs.Sort((x, y) =>
@@ -170,7 +170,8 @@ public class StraightSimilarityBlockService
         };
     }
 
-    private List<LinePair> CalculateIntersections(DistinctMatch<DocumentFileLine> match, long maxBucketSizeLimit)
+    private List<LinePair> CalculateIntersections(DistinctMatch<DocumentFileLine> match, long maxBucketSizeLimit, 
+        bool compareDifferentDocuments)
     {
         var groups = match.Result;
 
@@ -188,6 +189,10 @@ public class StraightSimilarityBlockService
                 {
                     var a = arr[i];
                     var b = arr[j];
+
+                    if (compareDifferentDocuments && a.DocumentId == b.DocumentId)
+                        continue;
+
                     if (a.DocumentId > b.DocumentId || (a.DocumentId == b.DocumentId && a.LineIndex > b.LineIndex))
                     {
                         (a, b) = (b, a);

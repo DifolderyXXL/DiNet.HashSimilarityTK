@@ -21,11 +21,4 @@ builder.Services.AddCliToolkit(cli =>
 using var host = builder.Build();
 
 var cliApp = host.Services.GetRequiredService<CliApplication>();
-await cliApp.Route(["seq",
-    @"C:\Dev\Innowise\InnoClinic",
-    "--shingle-size", "5",
-    "--num-hashes", "100",
-    "--chunk-step", "1",
-    "--seed", "42",
-    "--ignore", @"C:\Dev\Innowise\InnoClinic\hsim.ignore"
-    ], CancellationToken.None);
+await cliApp.Route(args, CancellationToken.None);

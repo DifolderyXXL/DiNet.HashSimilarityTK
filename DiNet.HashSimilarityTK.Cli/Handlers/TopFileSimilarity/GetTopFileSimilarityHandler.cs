@@ -58,6 +58,7 @@ public record GetLongestSequenceSimilarityQuery(
     int ChunkStep = 16,
     uint Seed = 123456789,
     uint MaxBucketSizeLimit = 100,
+    bool CompareDifferentDocuments = false,
     string? Ignore = null) : IQuery<bool>;
 
 internal class GetLongestSequenceSimilarityHandler(IDocumentMatchService matchService) : IQueryHandler<GetLongestSequenceSimilarityQuery, bool>
@@ -70,7 +71,7 @@ internal class GetLongestSequenceSimilarityHandler(IDocumentMatchService matchSe
 
 
         var sequenceService = new StraightSimilarityBlockService();
-        var sequence = sequenceService.ComputeSimilarity(context.Groups, query.MaxBucketSizeLimit);
+        var sequence = sequenceService.ComputeSimilarity(context.Groups, query.MaxBucketSizeLimit, query.CompareDifferentDocuments);
 
 
         var root = query.RootPath ?? Environment.CurrentDirectory;

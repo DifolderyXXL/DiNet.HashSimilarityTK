@@ -46,10 +46,19 @@ public class DocumentMatchService : IDocumentMatchService
 
         var store = indexer.BuildIndex(root);
 
+        var filter = new LineFilterBuilder()
+            .IgnoreWhitespace()
+            .MinLength(3)
+            .IgnoreStructuralSymbols()
+            .IgnoreComments()
+            .IgnoreImports()
+            .Build();
+
         var processingService = new DocumentProcessingService(
             store,
             new XxHasher(seed),
             matchTable,
+            filter,
             (document, hash, line) => new DocumentFileLine(document.Id, line, hash)
         );
 
