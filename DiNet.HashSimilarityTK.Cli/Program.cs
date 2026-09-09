@@ -5,16 +5,27 @@ using Microsoft.Extensions.Hosting;
 
 var builder = Host.CreateApplicationBuilder(args);
 
+builder.Services.AddScoped<IDocumentMatchService, DocumentMatchService>();
 builder.Services.AddCliToolkit(cli =>
 {
     cli.UseKebabCaseFormatter();
 
     cli.Handlers
         .Register<GetTopFileSimilarityHandler>("top");
+
+    cli.Handlers
+        .Register<GetLongestSequenceSimilarityHandler>("seq");
 });
 
 
 using var host = builder.Build();
 
 var cliApp = host.Services.GetRequiredService<CliApplication>();
-await cliApp.Route(args, CancellationToken.None);
+await cliApp.Route(["seq",
+    @"C:\Dev\Innowise\InnoClinic",
+    "--shingle-size", "5",
+    "--num-hashes", "100",
+    "--chunk-step", "1",
+    "--seed", "42",
+    "--ignore", @"C:\Dev\Innowise\InnoClinic\hsim.ignore"
+    ], CancellationToken.None);

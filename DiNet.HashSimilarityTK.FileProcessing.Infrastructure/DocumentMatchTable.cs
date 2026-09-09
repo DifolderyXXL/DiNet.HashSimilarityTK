@@ -154,7 +154,6 @@ public class DocumentStore : IDocumentStore
 }
 
 
-
 public class DocumentProcessingService(
     IDocumentStore store,
     IHasher hasher,
