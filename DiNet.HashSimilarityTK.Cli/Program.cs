@@ -5,12 +5,16 @@ using Microsoft.Extensions.Hosting;
 
 var builder = Host.CreateApplicationBuilder(args);
 
+builder.Services.AddScoped<IDocumentMatchService, DocumentMatchService>();
 builder.Services.AddCliToolkit(cli =>
 {
     cli.UseKebabCaseFormatter();
 
     cli.Handlers
         .Register<GetTopFileSimilarityHandler>("top");
+
+    cli.Handlers
+        .Register<GetLongestSequenceSimilarityHandler>("seq");
 });
 
 
