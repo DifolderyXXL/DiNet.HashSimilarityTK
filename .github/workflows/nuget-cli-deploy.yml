@@ -7,47 +7,59 @@ on:
     branches: [ "main" ]
 
 jobs:
-  build:
+  build-and-test:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
 
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 11.0.x
+
+      - name: Restore dependencies
+        run: dotnet restore
+
+      - name: Build
+        run: dotnet build --configuration Release --no-restore
+
+      - name: Run tests
+        run: dotnet test --configuration Release --no-build --verbosity normal
+
+      - name: Pack as Global Tool
+        run: dotnet pack ./DiNet.HashSimilarityTK.Cli/DiNet.HashSimilarityTK.Cli.csproj --configuration Release --no-build --output ./nupkg
+
+      - name: Upload NuGet package as artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: nupkg
+          path: ./nupkg/*.nupkg
+
+  publish-nuget:
+    needs: build-and-test
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    
     environment: production
     permissions:
       id-token: write
       contents: read
 
     steps:
-    - uses: actions/checkout@v4
+      - name: Download NuGet package artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: nupkg
+          path: ./nupkg
 
-    - name: Setup .NET
-      uses: actions/setup-dotnet@v4
-      with:
-        dotnet-version: 11.0.x
+      - name: Get temporary API key via OIDC
+        uses: NuGet/login@v1
+        id: login
+        with:
+          user: Difoldery
 
-    - name: Restore dependencies
-      run: dotnet restore
-
-    - name: Build
-      run: dotnet build --configuration Release --no-restore
-
-    - name: Run tests (if any)
-      run: dotnet test --configuration Release --no-build --verbosity normal
-
-    - name: Pack as Global Tool
-      run: dotnet pack ./DiNet.HashSimilarityTK.Cli/DiNet.HashSimilarityTK.Cli.csproj --configuration Release --no-build --output ./nupkg
-
-    - name: Upload NuGet package as artifact
-      uses: actions/upload-artifact@v4
-      with:
-        name: nupkg
-        path: ./nupkg/*.nupkg
-
-    - name: Get temporary API key via OIDC
-      if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-      uses: NuGet/login@v1
-      id: login
-      with:
-        user: Difoldery
-
-    - name: Publish to NuGet
-      if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-      run: dotnet nuget push ./nupkg/*.nupkg --source https://api.nuget.org/v3/index.json --api-key ${{ steps.login.outputs.NUGET_API_KEY }}
+      - name: Publish to NuGet
+        run: dotnet nuget push ./nupkg/*.nupkg --source https://api.nuget.org/v3/index.json --api-key ${{ steps.login.outputs.NUGET_API_KEY }}
