@@ -15,5 +15,11 @@
     <Project Path="DiNet.HashSimilarityTK.MetricsEngine.Core/DiNet.HashSimilarityTK.MetricsEngine.Core.csproj" Id="65241386-04b3-44bf-9c48-1bef7f6bae2a" />
     <Project Path="DiNet.HashSimilarityTK.MetricsEngine.Infrastructure/DiNet.HashSimilarityTK.MetricsEngine.Infrastructure.csproj" Id="6e7ac098-dc4a-4c03-82d4-7706e808b5b1" />
   </Folder>
+  <Folder Name="/Toolkit/">
+    <Project Path="DiNet.HashSimilarityTK.CliToolkit.Core/DiNet.HashSimilarityTK.CliToolkit.Core.csproj" Id="4fb32070-5903-4a18-ac98-4c2b16ce5c7e" />
+    <Project Path="DiNet.HashSimilarityTK.CliToolkit.Infrastructure/DiNet.HashSimilarityTK.CliToolkit.Infrastructure.csproj" Id="8caa0974-324a-45b0-9e41-1eef2395dc6a" />
+    <Project Path="DiNet.HashSimilarityTK.CliToolkit.Tests/DiNet.HashSimilarityTK.CliToolkit.Tests.csproj" Id="195dbb8e-85e3-4fd8-8555-28bad5ec6422" />
+    <Project Path="DiNet.HashSimilarityTK.CliToolkit/DiNet.HashSimilarityTK.CliToolkit.csproj" Id="f8c26c4a-6323-4cd2-906a-55f081a4e22f" />
+  </Folder>
   <Project Path="DiNet.HashSimilarityTK.Console/DiNet.HashSimilarityTK.Console.csproj" />
 </Solution>

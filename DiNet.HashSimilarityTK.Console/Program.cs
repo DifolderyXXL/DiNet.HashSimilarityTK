@@ -21,7 +21,7 @@ var indexer = new DocumentIndexer(fileSystem);
 var store = indexer.BuildIndex(@"C:\C#\Leasure\DiNet.HashSimilarityTK\DiNet.HashSimilarityTK.Console\TestRoot\");
 
 
-var service = new DocumentProcessingService(store, new XxHasher(123456789), matchTable, (document, hash, line) =>
+var service = new DocumentProcessingService(store, new XxHasher(123456789), matchTable, new NonEmptyLineFilter(), (document, hash, line) =>
 {
     return new(document.Id, line, hash);
 });
