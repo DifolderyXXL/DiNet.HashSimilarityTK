@@ -11,6 +11,7 @@ builder.Services.AddCliToolkit(cli =>
     cli.UseKebabCaseFormatter();
 
     cli.Handlers
+        .IntroduceHelpCommand("help")
         .Register<GetTopFileSimilarityHandler>("top");
 
     cli.Handlers

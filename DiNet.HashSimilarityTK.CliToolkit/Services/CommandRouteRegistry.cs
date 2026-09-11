@@ -14,4 +14,6 @@ public class CommandRouteRegistry
 
     public bool TryGetHandlerType(string route, out Type? handlerType)
         => _routes.TryGetValue(route, out handlerType);
+
+    public IEnumerable<KeyValuePair<string, Type>> Routes => _routes;
 }

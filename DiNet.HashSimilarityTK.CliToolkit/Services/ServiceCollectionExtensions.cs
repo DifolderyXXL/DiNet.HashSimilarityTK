@@ -2,6 +2,7 @@
 using DiNet.HashSimilarityTK.CliToolkit.Core.Intrerfaces;
 using DiNet.HashSimilarityTK.CliToolkit.Infrastructure;
 using DiNet.HashSimilarityTK.CliToolkit.Infrastructure.Formatters;
+using DiNet.HashSimilarityTK.CliToolkit.Services.HelpHandler;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace DiNet.HashSimilarityTK.CliToolkit.Services;
@@ -100,7 +101,15 @@ public class HandlerRegistry
         _services.AddTransient<THandler>();
         return this;
     }
+
+    public HandlerRegistry IntroduceHelpCommand(string route)
+    {
+        _registry.Register<HelpCommandHandler>(route);
+        _services.AddTransient<HelpCommandHandler>();
+        return this;
+    }
 }
+
 
 public class PresenterRegistry
 {
