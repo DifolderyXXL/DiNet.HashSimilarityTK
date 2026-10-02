@@ -6,17 +6,20 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
 
-	  <PackAsTool>true</PackAsTool>
-	  <ToolCommandName>hsim</ToolCommandName>
-	  <PackageOutputPath>./nupkg</PackageOutputPath>
+	<PackAsTool>true</PackAsTool>
+	<ToolCommandName>hsim</ToolCommandName>
+	<PackageOutputPath>./nupkg</PackageOutputPath>
+	
+	<Version>0.1.2</Version>
+	<Description>CLI tool for detecting similar files using HashSimilarityTK</Description>
+	<Authors>DifolderyXXL</Authors>
+	<PackageTags>similarity;hash;cli;tool</PackageTags>
 
-	  <Version>0.1.1</Version>
-	  <Description>CLI tool for detecting similar files using HashSimilarityTK</Description>
-	  <PackageReadmeFile>README.md</PackageReadmeFile>
-	  <Authors>DifolderyXXL</Authors>
-	  <PackageTags>similarity;hash;cli;tool</PackageTags>
-	  <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
-	  <PackageReadmeFile>README.md</PackageReadmeFile>
+	<RepositoryUrl>https://github.com/DifolderyXXL/DiNet.HashSimilarityTK</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+
+	<GeneratePackageOnBuild>True</GeneratePackageOnBuild>
+	<PackageReadmeFile>README.md</PackageReadmeFile>
   </PropertyGroup>
 
   <ItemGroup>
