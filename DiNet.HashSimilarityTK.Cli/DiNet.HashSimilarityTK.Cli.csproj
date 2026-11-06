@@ -30,13 +30,16 @@
   </ItemGroup>
 
   <ItemGroup>
+	  <PackageReference Include="DiNet.CliToolkit" Version="0.1.1" />
+	  <PackageReference Include="Humanizer" Version="3.0.10" />
 	  <PackageReference Include="Microsoft.Extensions.Hosting" Version="10.0.11" />
 	  
     <PackageReference Include="Ignore" Version="0.2.1" />
+	  
+    <PackageReference Include="Scrutor" Version="7.0.0" />
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\DiNet.HashSimilarityTK.CliToolkit\DiNet.HashSimilarityTK.CliToolkit.csproj" />
     <ProjectReference Include="..\DiNet.HashSimilarityTK.FileProcessing.Core\DiNet.HashSimilarityTK.FileProcessing.Core.csproj" />
     <ProjectReference Include="..\DiNet.HashSimilarityTK.FileProcessing.Infrastructure\DiNet.HashSimilarityTK.FileProcessing.Infrastructure.csproj" />
     <ProjectReference Include="..\DiNet.HashSimilarityTK.Infrastructure\DiNet.HashSimilarityTK.Infrastructure.csproj" />

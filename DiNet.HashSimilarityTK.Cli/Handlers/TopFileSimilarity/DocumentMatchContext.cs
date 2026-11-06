@@ -1,6 +1,7 @@
 ﻿using DiNet.HashSimilarityTK.Core;
 using DiNet.HashSimilarityTK.FileProcessing.Core;
 using DiNet.HashSimilarityTK.FileProcessing.Infrastructure;
+using DiNet.HashSimilarityTK.FileProcessing.Infrastructure.Indexing;
 using DiNet.HashSimilarityTK.Infrastructure;
 
 namespace DiNet.HashSimilarityTK.Cli.Handlers.TopFileSimilarity;
@@ -13,24 +14,22 @@ public record DocumentMatchContext(
 public interface IDocumentMatchService
 {
     Task<DocumentMatchContext> ExtractMatchGroupsAsync(
-        string? rootPath,
+        IDocumentStore store,
         int shingleSize,
         int numHashes,
         int chunkStep,
         uint seed,
-        string? ignore,
         CancellationToken ct = default);
 }
 
-public class DocumentMatchService : IDocumentMatchService
+public class DocumentMatchService(IDocumentReader reader) : IDocumentMatchService
 {
     public async Task<DocumentMatchContext> ExtractMatchGroupsAsync(
-        string? rootPath,
+        IDocumentStore store,
         int shingleSize,
         int numHashes,
         int chunkStep,
         uint seed,
-        string? ignore,
         CancellationToken ct = default)
     {
         var matchTable = new MatchSet<DocumentFileLine>(
@@ -40,27 +39,10 @@ public class DocumentMatchService : IDocumentMatchService
             seed: seed
         );
 
-        var root = rootPath ?? Environment.CurrentDirectory;
-        var fileSystem = new GitIgnoredFileSystem(ignore);
-        var indexer = new DocumentIndexer(fileSystem);
+        var docIndexer = new DocumentIndexer(new XxHasher(seed), reader, matchTable);
+        var stats = new DocumentStatsStore(store);
+        var processingService = new DocumentProcessingService(store, docIndexer, stats);
 
-        var store = indexer.BuildIndex(root);
-
-        var filter = new LineFilterBuilder()
-            .IgnoreWhitespace()
-            .MinLength(3)
-            .IgnoreStructuralSymbols()
-            .IgnoreComments()
-            .IgnoreImports()
-            .Build();
-
-        var processingService = new DocumentProcessingService(
-            store,
-            new XxHasher(seed),
-            matchTable,
-            filter,
-            (document, hash, line) => new DocumentFileLine(document.Id, line, hash)
-        );
 
         await processingService.ProcessAllDocumentsAsync(ct);
 

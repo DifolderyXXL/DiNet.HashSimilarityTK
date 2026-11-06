@@ -1,26 +1,26 @@
-﻿using DiNet.HashSimilarityTK.CliToolkit.Abstraction;
-using DiNet.HashSimilarityTK.CliToolkit.Core.Attributes;
-using DiNet.HashSimilarityTK.FileProcessing.Core;
+﻿using DiNet.CliToolkit.Abstraction;
+using DiNet.HashSimilarityTK.Cli.Handlers.RepositoryStatistics;
+using DiNet.HashSimilarityTK.FileProcessing.Infrastructure;
 using DiNet.HashSimilarityTK.MetricsEngine.Application;
 
 namespace DiNet.HashSimilarityTK.Cli.Handlers.TopFileSimilarity;
 
 public record GetTopFileSimilarityQuery(
-    [NotFlagged] string? RootPath = null,
     int ShingleSize = 4,
     int NumHashes = 128,
     int ChunkStep = 16,
     uint Seed = 123456789,
-    int Top = 5,
-    string? Ignore = null) : IQuery<bool>;
+    int Top = 5) : RootBaseQuery;
 
 internal class GetTopFileSimilarityHandler(IDocumentMatchService matchService) : IQueryHandler<GetTopFileSimilarityQuery, bool>
 {
     public async Task<bool> Handle(GetTopFileSimilarityQuery query, CancellationToken ct)
-{
-        var context = await matchService.ExtractMatchGroupsAsync(
-            query.RootPath, query.ShingleSize, query.NumHashes,
-            query.ChunkStep, query.Seed, query.Ignore, ct);
+    {
+        var store = RepositoryIndexHelper.Index(query);
+
+        var context = await matchService.ExtractMatchGroupsAsync(store,
+            query.ShingleSize, query.NumHashes,
+            query.ChunkStep, query.Seed, ct);
 
         var jaccard = new JaccardSimilarityService();
         var scores = jaccard.ComputeSimilarity(context.Groups, context.Store);
@@ -30,8 +30,7 @@ internal class GetTopFileSimilarityHandler(IDocumentMatchService matchService) :
                                         .Take(query.Top)
                                         .ToList();
 
-        var root = query.RootPath ?? Environment.CurrentDirectory;
-        Console.WriteLine($"Top {query.Top} most similar files in: {root}");
+        Console.WriteLine($"Top {query.Top} most similar files in: {query.Root}");
 
         if (!topScores.Any())
         {
@@ -52,30 +51,28 @@ internal class GetTopFileSimilarityHandler(IDocumentMatchService matchService) :
 
 
 public record GetLongestSequenceSimilarityQuery(
-    [NotFlagged] string? RootPath = null,
     int ShingleSize = 4,
     int NumHashes = 128,
     int ChunkStep = 16,
     uint Seed = 123456789,
     uint MaxBucketSizeLimit = 100,
-    bool CompareDifferentDocuments = false,
-    string? Ignore = null) : IQuery<bool>;
+    bool CompareDifferentDocuments = false) : RootBaseQuery;
 
-internal class GetLongestSequenceSimilarityHandler(IDocumentMatchService matchService) : IQueryHandler<GetLongestSequenceSimilarityQuery, bool>
+internal class GetLongestSequenceSimilarityHandler(IDocumentMatchService matchService, DocumentReader reader) : IQueryHandler<GetLongestSequenceSimilarityQuery, bool>
 {
     public async Task<bool> Handle(GetLongestSequenceSimilarityQuery query, CancellationToken ct)
     {
-        var context = await matchService.ExtractMatchGroupsAsync(
-            query.RootPath, query.ShingleSize, query.NumHashes,
-            query.ChunkStep, query.Seed, query.Ignore, ct);
+        var store = RepositoryIndexHelper.Index(query);
 
+        var context = await matchService.ExtractMatchGroupsAsync(store,
+            query.ShingleSize, query.NumHashes,
+            query.ChunkStep, query.Seed, ct);
 
         var sequenceService = new StraightSimilarityBlockService();
         var sequence = sequenceService.ComputeSimilarity(context.Groups, query.MaxBucketSizeLimit, query.CompareDifferentDocuments);
 
 
-        var root = query.RootPath ?? Environment.CurrentDirectory;
-        Console.WriteLine($"Longest sequence in: {root}");
+        Console.WriteLine($"Longest sequence in: {query.Root}");
 
         if (sequence == null)
         {
@@ -83,8 +80,12 @@ internal class GetLongestSequenceSimilarityHandler(IDocumentMatchService matchSe
             return true;
         }
 
-        var linesA = context.Store.GetDocument(sequence.DocA)!.ReadLineRange(sequence.StartLineA, sequence.Length);
-        var linesB = context.Store.GetDocument(sequence.DocB)!.ReadLineRange(sequence.StartLineB, sequence.Length);
+
+        var linesA = await reader.EnumerateLines(context.Store.GetDocument(sequence.DocA)!, ct)
+            .ReadLineRange((int)sequence.StartLineA, (int)sequence.Length);
+
+        var linesB = await reader.EnumerateLines(context.Store.GetDocument(sequence.DocB)!, ct)
+            .ReadLineRange((int)sequence.StartLineB, (int)sequence.Length);
 
         var fileA = context.Store.GetDocument(sequence.DocA)?.FullPath ?? "Unknown";
         var fileB = context.Store.GetDocument(sequence.DocB)?.FullPath ?? "Unknown";
@@ -119,25 +120,7 @@ internal class GetLongestSequenceSimilarityHandler(IDocumentMatchService matchSe
 
 public static class DocumentHelper
 {
-    public static List<string> ReadLineRange(this IDocument document, long startLine, long length)
-    {
-        var result = new List<string>((int)length);
+    public static async Task<List<string>> ReadLineRange(this IAsyncEnumerable<LineData> lines, int startLine, int length)
+        => await lines.Skip(startLine).Take(length).Select(x => x.Text).ToListAsync();
 
-        using var reader = document.OpenTextReader();
-        long currentLine = 0;
-        string? line;
-        
-        while (currentLine < startLine && (line = reader.ReadLine()) != null)
-        {
-            currentLine++;
-        }
-
-        while (currentLine < startLine + length && (line = reader.ReadLine()) != null)
-        {
-            result.Add(line);
-            currentLine++;
-        }
-
-        return result;
-    }
 }

@@ -96,11 +96,6 @@ The repository is structured into modular engines separating application logic, 
   * `DiNet.HashSimilarityTK.MetricsEngine.App`
   * `DiNet.HashSimilarityTK.MetricsEngine.Core`
   * `DiNet.HashSimilarityTK.MetricsEngine.Infrastructure`
-* **Toolkit**: Custom Reflection-based CLI Routing Framework.
-  * `DiNet.HashSimilarityTK.CliToolkit`
-  * `DiNet.HashSimilarityTK.CliToolkit.Core`
-  * `DiNet.HashSimilarityTK.CliToolkit.Infrastructure`
-  * `DiNet.HashSimilarityTK.CliToolkit.Tests`
 
 ---
 
@@ -118,56 +113,7 @@ At its core, the similarity calculation engine leverages **[MinHash](https://en.
 
 The toolkit uses a custom reflection-driven routing engine built specifically for single-execution CLI applications. Handlers are loosely coupled and bound via route words.
 
-### Pipeline Setup
-
-```csharp
-var builder = Host.CreateApplicationBuilder(args);
-
-// Handlers leverage Dependency Injection, allowing easy integration of custom services
-builder.Services.AddScoped<IDocumentMatchService, DocumentMatchService>();
-
-builder.Services.AddCliToolkit(cli =>
-{
-    // Configures CLI parameter naming conventions (e.g., kebab-case: --root-path)
-    cli.UseKebabCaseFormatter();
-
-    // Register route keys to their corresponding command handlers
-    cli.Handlers
-        .IntroduceHelpCommand("help") // Optional: Enables built-in 'help' command listing all registered routes
-        .Register<GetTopFileSimilarityHandler>("top");
-
-    cli.Handlers
-        .Register<GetLongestSequenceSimilarityHandler>("seq");
-});
-
-using var host = builder.Build();
-var cliApp = host.Services.GetRequiredService<CliApplication>();
-await cliApp.Route(args, CancellationToken.None);
-
-```
-
-### Query & Parameter Mapping
-
-Commands are structured as strongly-typed records implementing `IQuery<T>`. Arguments are automatically parsed from command-line input and matched to parameter names based on configured conventions (such as kebab-case).
-
-```csharp
-public record GetTopFileSimilarityQuery(
-    [NotFlagged] string? RootPath = null,
-    int ShingleSize = 4,
-    int NumHashes = 128,
-    int ChunkStep = 16,
-    uint Seed = 123456789,
-    int Top = 5,
-    string? Ignore = null) : IQuery<bool>;
-
-```
-
-### Key Parameter Features
-
-* **Unflagged Arguments (`[NotFlagged]`)**: Allows the primary argument (such as a target directory path) to be passed positionally without an explicit flag switch (e.g., `top ./src`).
-* **Default Values**: Optional parameters retain default values if omitted from the CLI execution string.
-* **Boolean Switch Parsing**: Flags without explicit value bindings (e.g., `--use-logs`) dynamically evaluate to `true` when supplied, falling back to `false` (or their configured default) when omitted.
-* **Format Parsers**: Handles case conventions (kebab-case flag bindings converting to PascalCase C# properties) seamlessly.
+Check out the [DiNet.CliToolkit Repository](https://github.com/DifolderyXXL/DiNet.CliToolkit)
 
 ---
 

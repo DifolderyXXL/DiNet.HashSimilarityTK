@@ -1,28 +1,48 @@
-﻿using DiNet.HashSimilarityTK.FileProcessing.Infrastructure;
-using Ignore;
+﻿using DiNet.HashSimilarityTK.FileProcessing.Infrastructure.FileSystem;
 
 namespace DiNet.HashSimilarityTK.Cli;
+
+public class ExtensionFileSystem(IFileSystem baseFileSystem, HashSet<string> extensions) : IFileSystem
+{
+    public IEnumerable<string> EnumerateDirectories(string path)
+    {
+        return baseFileSystem.EnumerateDirectories(path);
+    }
+
+    public IEnumerable<string> EnumerateFiles(string path)
+    {
+        return baseFileSystem.EnumerateFiles(path)
+            .Where(x=> extensions.Contains(Path.GetExtension(x)));
+    }
+
+    public Stream OpenRead(string path)
+    {
+        return baseFileSystem.OpenRead(path);
+    }
+}
 
 public class GitIgnoredFileSystem : IFileSystem
 {
     private readonly IgnoreRules _rules;
+    private readonly IFileSystem _baseFileSystem;
 
-    public GitIgnoredFileSystem(string? ignoreFilePath)
+    public GitIgnoredFileSystem(IFileSystem baseFileSystem, string? ignoreFilePath)
     {
         _rules = new(File.Exists(ignoreFilePath)
             ? File.ReadAllLines(ignoreFilePath)
             : Array.Empty<string>());
+        _baseFileSystem = baseFileSystem;
     }
 
     public IEnumerable<string> EnumerateDirectories(string path)
     {
-        return Directory.EnumerateDirectories(path)
+        return _baseFileSystem.EnumerateDirectories(path)
             .Where(dir => !IsIgnored(path, dir, isDirectory: true));
     }
 
     public IEnumerable<string> EnumerateFiles(string path)
     {
-        return Directory.EnumerateFiles(path)
+        return _baseFileSystem.EnumerateFiles(path)
             .Where(file => !IsIgnored(path, file, isDirectory: false));
     }
 
@@ -35,7 +55,7 @@ public class GitIgnoredFileSystem : IFileSystem
             throw new UnauthorizedAccessException($"Access denied. Path is ignored: {path}");
         }
 
-        return File.OpenRead(path);
+        return _baseFileSystem.OpenRead(path);
     }
 
     private bool IsIgnored(string basePath, string fullPath, bool isDirectory)
