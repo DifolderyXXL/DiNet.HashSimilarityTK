@@ -1,11 +1,12 @@
 ﻿using DiNet.HashSimilarityTK.Core;
+using System.Collections.Concurrent;
 using System.Runtime.InteropServices;
 
 namespace DiNet.HashSimilarityTK.Infrastructure;
 
-public class DictionaryHashMatchBucker<T>(int signatureChunkStep, IHasher hasher) : IHashMatchBucket<T>
+public class ConcurrentDictionaryHashMatchBucker<T>(int signatureChunkStep, IHasher hasher) : IHashMatchBucket<T>
 {
-    private Dictionary<Hash, List<T>> _entries = [];
+    private ConcurrentDictionary<Hash, ConcurrentBag<T>> _entries = [];
 
     public IEnumerable<IEnumerable<T>> EnumerateAllMatchings()
     {
@@ -21,12 +22,7 @@ public class DictionaryHashMatchBucker<T>(int signatureChunkStep, IHasher hasher
 
             var entireHash = hasher.Hash(bytes);
 
-            if (!_entries.TryGetValue(entireHash, out var entries))
-            {
-                entries = [];
-                _entries[entireHash] = entries;
-            }
-            entries.Add(key);
+            _entries.GetOrAdd(entireHash, _ => []).Add(key);
         }
     }
 }

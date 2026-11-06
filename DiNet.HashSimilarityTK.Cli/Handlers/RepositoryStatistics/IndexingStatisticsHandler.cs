@@ -1,9 +1,10 @@
 ﻿using DiNet.CliToolkit.Abstraction;
-using DiNet.CliToolkit.Core.Attributes;
+using DiNet.HashSimilarityTK.Cli.Handlers.Common;
 using DiNet.HashSimilarityTK.FileProcessing.Core;
 using DiNet.HashSimilarityTK.FileProcessing.Infrastructure;
 using DiNet.HashSimilarityTK.FileProcessing.Infrastructure.FileSystem;
 using DiNet.HashSimilarityTK.FileProcessing.Infrastructure.Indexing;
+using System.Diagnostics;
 
 namespace DiNet.HashSimilarityTK.Cli.Handlers.RepositoryStatistics;
 
@@ -38,9 +39,10 @@ public class IndexingStatisticsHandler(IDocumentReader reader) : IQueryHandler<G
 {
     public async Task<bool> Handle(GetIndexingStatisticsQuery query, CancellationToken ct)
     {
+        var sw = Stopwatch.StartNew();
         var store = RepositoryIndexHelper.Index(query);
 
-        Console.WriteLine($"Total Documents Processed : {store.DocumentCount:N0}");
+        Console.WriteLine($"Total Documents Processed : {store.DocumentCount:N0} (Time: {sw.Elapsed})");
 
         long totalLineCount = 0;
         foreach (var doc in store.GetAllDocuments())

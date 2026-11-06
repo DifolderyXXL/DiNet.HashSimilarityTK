@@ -41,7 +41,7 @@ public class DocumentMatchService(IDocumentReader reader) : IDocumentMatchServic
 
         var docIndexer = new DocumentIndexer(new XxHasher(seed), reader, matchTable);
         var stats = new DocumentStatsStore(store);
-        var processingService = new DocumentProcessingService(store, docIndexer, stats);
+        var processingService = new ParallelDocumentProcessingService(store, docIndexer, stats);
 
 
         await processingService.ProcessAllDocumentsAsync(ct);

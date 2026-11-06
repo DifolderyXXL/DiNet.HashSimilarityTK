@@ -1,5 +1,4 @@
 ﻿using DiNet.HashSimilarityTK.Core;
-using System.Text.RegularExpressions;
 
 namespace DiNet.HashSimilarityTK.Infrastructure;
 

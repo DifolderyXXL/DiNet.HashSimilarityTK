@@ -12,6 +12,11 @@
 
 **DiNet.HashSimilarityTK** helps developers detect structural redundancies, scattered domain models, and duplicate logic across repositories—even when class names or formatting differ. It enables engineering teams to enforce the [DRY (Don't Repeat Yourself)](https://en.wikipedia.org/wiki/Don%27t_repeat_yourself) principle and streamline refactoring efforts.
 
+
+## Parallel processing
+
+**DiNet.HashSimilarityTK** processes documents in parallel that make it blazingly fast.
+
 ---
 
 
