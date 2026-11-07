@@ -1,39 +1,39 @@
 ﻿using DiNet.CliToolkit.Abstraction;
 using DiNet.HashSimilarityTK.Cli.Handlers.Common;
 using DiNet.HashSimilarityTK.Cli.Handlers.RepositoryStatistics;
+using DiNet.HashSimilarityTK.Cli.Services.Telemetry;
 using DiNet.HashSimilarityTK.FileProcessing.Infrastructure;
 using DiNet.HashSimilarityTK.MetricsEngine.Application;
-using System.Diagnostics;
 
 namespace DiNet.HashSimilarityTK.Cli.Handlers.TopFileSimilarity;
+
 public record GetTopFileSimilarityQuery(
     int Top = 5) : LSHBaseQuery;
 
-internal class GetTopFileSimilarityHandler(IDocumentMatchService matchService) : IQueryHandler<GetTopFileSimilarityQuery, bool>
+internal class GetTopFileSimilarityHandler(IDocumentMatchService matchService, ITelemetry telemetry) : IQueryHandler<GetTopFileSimilarityQuery, bool>
 {
     public async Task<bool> Handle(GetTopFileSimilarityQuery query, CancellationToken ct)
     {
-        var sw = Stopwatch.StartNew();
-        var store = RepositoryIndexHelper.Index(query);
-        Console.WriteLine($"Index in {sw.Elapsed}");
-        sw.Restart();
-
+        var store = telemetry.Process("Index", () => RepositoryIndexHelper.Index(query));
 
         var context = await matchService.ExtractMatchGroupsAsync(store,
             query.ShingleSize, query.NumHashes,
             query.ChunkStep, query.Seed, ct);
-        Console.WriteLine($"Matching table in {sw.Elapsed}");
-        sw.Restart();
 
-        var jaccard = new JaccardSimilarityService();
-        var scores = jaccard.ComputeSimilarity(context.Groups, context.Store);
 
-        var topScores = scores.GetAllScores()
-                                        .OrderByDescending(x => x.Similarity)
-                                        .Take(query.Top)
-                                        .ToList();
-        Console.WriteLine($"Scores in {sw.Elapsed}");
-        sw.Restart();
+        var topScores = telemetry.Process(
+                    "Compute similarity",
+                    (context, query.Top),
+                    static state =>
+                    {
+                        var jaccard = new JaccardSimilarityService();
+                        var scores = jaccard.ComputeSimilarity(state.context.Groups, state.context.Store);
+
+                        return scores.GetAllScores()
+                            .OrderByDescending(x => x.Similarity)
+                            .Take(state.Top)
+                            .ToList();
+                    });
 
         Console.WriteLine($"Top {query.Top} most similar files in: {query.Root}");
 

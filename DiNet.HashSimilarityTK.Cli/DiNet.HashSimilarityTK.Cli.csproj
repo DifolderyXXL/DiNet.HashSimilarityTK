@@ -30,7 +30,7 @@
   </ItemGroup>
 
   <ItemGroup>
-	  <PackageReference Include="DiNet.CliToolkit" Version="0.1.1" />
+	  <PackageReference Include="DiNet.CliToolkit" Version="0.1.2" />
 	  <PackageReference Include="Humanizer" Version="3.0.10" />
 	  <PackageReference Include="Microsoft.Extensions.Hosting" Version="10.0.11" />
 	  

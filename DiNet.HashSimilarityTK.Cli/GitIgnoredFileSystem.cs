@@ -1,7 +1,26 @@
 ﻿using DiNet.HashSimilarityTK.FileProcessing.Infrastructure.FileSystem;
+using System.Text.RegularExpressions;
 
 namespace DiNet.HashSimilarityTK.Cli;
 
+public class RegexExtensionFileSystem(IFileSystem baseFileSystem, Regex regex) : IFileSystem
+{
+    public IEnumerable<string> EnumerateDirectories(string path)
+    {
+        return baseFileSystem.EnumerateDirectories(path);
+    }
+
+    public IEnumerable<string> EnumerateFiles(string path)
+    {
+        return baseFileSystem.EnumerateFiles(path)
+            .Where(x => regex.IsMatch(x));
+    }
+
+    public Stream OpenRead(string path)
+    {
+        return baseFileSystem.OpenRead(path);
+    }
+}
 public class ExtensionFileSystem(IFileSystem baseFileSystem, HashSet<string> extensions) : IFileSystem
 {
     public IEnumerable<string> EnumerateDirectories(string path)

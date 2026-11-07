@@ -41,11 +41,20 @@ public static class DependencyInjection
                     var ms = activity.Duration.TotalMilliseconds;
                     var isError = activity.Status == ActivityStatusCode.Error;
 
+                    var depth = 0;
+                    var parent = activity.Parent;
+                    while (parent is not null)
+                    {
+                        depth++;
+                        parent = parent.Parent;
+                    }
+                    var indent = new string('\t', depth);
+
                     lock (ConsoleLock)
                     {
                         Console.ForegroundColor = isError ? ConsoleColor.Red : ConsoleColor.DarkGray;
 
-                        Console.Error.WriteLine($"[trace] {activity.DisplayName} — {ms:F1} ms {(isError ? "[FAILED]" : "")}");
+                        Console.Error.WriteLine($"[trace] {indent}{activity.DisplayName} — {ms:F1} ms {(isError ? "[FAILED]" : "")}");
                         Console.ResetColor();
                     }
 
