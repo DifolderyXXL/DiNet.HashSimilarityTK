@@ -1,4 +1,5 @@
-﻿using DiNet.HashSimilarityTK.Core;
+﻿using DiNet.HashSimilarityTK.Cli.Services.Telemetry;
+using DiNet.HashSimilarityTK.Core;
 using DiNet.HashSimilarityTK.FileProcessing.Core;
 using DiNet.HashSimilarityTK.FileProcessing.Infrastructure;
 using DiNet.HashSimilarityTK.FileProcessing.Infrastructure.Indexing;
@@ -22,7 +23,7 @@ public interface IDocumentMatchService
         CancellationToken ct = default);
 }
 
-public class DocumentMatchService(IDocumentReader reader) : IDocumentMatchService
+public class DocumentMatchService(IDocumentReader reader, ITelemetry telemetry) : IDocumentMatchService
 {
     public async Task<DocumentMatchContext> ExtractMatchGroupsAsync(
         IDocumentStore store,
@@ -44,7 +45,7 @@ public class DocumentMatchService(IDocumentReader reader) : IDocumentMatchServic
         var processingService = new ParallelDocumentProcessingService(store, docIndexer, stats);
 
 
-        await processingService.ProcessAllDocumentsAsync(ct);
+        await telemetry.ProcessAsync("Document processing", processingService.ProcessAllDocumentsAsync, ct);
 
         var groups = matchTable.EnumerateAllMatchings().ToDistinctGroups();
 

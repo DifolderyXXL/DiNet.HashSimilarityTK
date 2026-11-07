@@ -1,9 +1,9 @@
 ﻿using DiNet.CliToolkit.Abstraction;
 using DiNet.HashSimilarityTK.Cli.Handlers.Common;
 using DiNet.HashSimilarityTK.Cli.Handlers.RepositoryStatistics;
+using DiNet.HashSimilarityTK.Cli.Services.Telemetry;
 using DiNet.HashSimilarityTK.FileProcessing.Infrastructure;
 using DiNet.HashSimilarityTK.MetricsEngine.Application;
-using System.Diagnostics;
 
 namespace DiNet.HashSimilarityTK.Cli.Handlers.TopFileSimilarity;
 
@@ -11,26 +11,23 @@ public record GetLongestSequenceSimilarityQuery(
     uint MaxBucketSizeLimit = 100,
     bool CompareDifferentDocuments = false) : LSHBaseQuery;
 
-internal class GetLongestSequenceSimilarityHandler(IDocumentMatchService matchService, DocumentReader reader) : IQueryHandler<GetLongestSequenceSimilarityQuery, bool>
+internal class GetLongestSequenceSimilarityHandler(
+    IDocumentMatchService matchService,
+    DocumentReader reader,
+    ITelemetry telemetry) : IQueryHandler<GetLongestSequenceSimilarityQuery, bool>
 {
     public async Task<bool> Handle(GetLongestSequenceSimilarityQuery query, CancellationToken ct)
     {
-        var sw = Stopwatch.StartNew();
-        var store = RepositoryIndexHelper.Index(query);
-        Console.WriteLine($"Index in {sw.Elapsed}");
-        sw.Restart();
-
+        var store = telemetry.Process("Index", () => RepositoryIndexHelper.Index(query));
 
         var context = await matchService.ExtractMatchGroupsAsync(store,
             query.ShingleSize, query.NumHashes,
             query.ChunkStep, query.Seed, ct);
-        Console.WriteLine($"Matching table in {sw.Elapsed}");
-        sw.Restart();
 
         var sequenceService = new StraightSimilarityBlockService();
-        var sequence = sequenceService.ComputeSimilarity(context.Groups, query.MaxBucketSizeLimit, query.CompareDifferentDocuments);
-        Console.WriteLine($"Scores in {sw.Elapsed}");
-        sw.Restart();
+
+        var sequence = telemetry.Process("Compute similarity",
+            () => sequenceService.ComputeSimilarity(context.Groups, query.MaxBucketSizeLimit, query.CompareDifferentDocuments));
 
         Console.WriteLine($"Longest sequence in: {query.Root}");
 

@@ -1,4 +1,5 @@
 ﻿using DiNet.CliToolkit.Abstraction;
+using DiNet.CliToolkit.Core.Attributes;
 using DiNet.HashSimilarityTK.Cli.Handlers.Common;
 using DiNet.HashSimilarityTK.FileProcessing.Core;
 using DiNet.HashSimilarityTK.FileProcessing.Infrastructure;
@@ -21,15 +22,6 @@ public static class RepositoryIndexHelper
 
         return store;
     }
-}
-
-public abstract record RootBaseQuery : IQuery<bool>
-{
-    [NotFlagged]
-    public string? RootPath { get; set; } = null;
-    public string? Ignore { get; set; } = null;
-
-    public string Root => RootPath ?? Environment.CurrentDirectory;
 }
 
 public record GetIndexingStatisticsQuery(
