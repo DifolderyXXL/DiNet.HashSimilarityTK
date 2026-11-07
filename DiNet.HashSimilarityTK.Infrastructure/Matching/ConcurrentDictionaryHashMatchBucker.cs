@@ -6,7 +6,7 @@ namespace DiNet.HashSimilarityTK.Infrastructure;
 
 public class ConcurrentDictionaryHashMatchBucker<T>(int signatureChunkStep, IHasher hasher) : IHashMatchBucket<T>
 {
-    private ConcurrentDictionary<Hash, ConcurrentBag<T>> _entries = [];
+    private ConcurrentDictionary<Hash, List<T>> _entries = [];
 
     public IEnumerable<IEnumerable<T>> EnumerateAllMatchings()
     {
@@ -22,7 +22,11 @@ public class ConcurrentDictionaryHashMatchBucker<T>(int signatureChunkStep, IHas
 
             var entireHash = hasher.Hash(bytes);
 
-            _entries.GetOrAdd(entireHash, _ => []).Add(key);
+            var list = _entries.GetOrAdd(entireHash, _ => []);
+            lock(list)
+            {
+                list.Add(key);
+            }
         }
     }
 }
